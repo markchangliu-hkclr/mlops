@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlops"
+version = "0.1.0"
+requires-python = ">=3.8"
+
+dependencies = [
+    "numpy",
+    "pycocotools"
+]
+
+[project.optional-dependencies]
+gui = [
+    "opencv-python"
+]
+no_gui = [
+    "opencv-python-headless"
+]
+
+[tool.setuptools]
+packages = [
+    "mlops",
+]
