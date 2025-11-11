@@ -2,67 +2,21 @@ import os
 import json
 import shutil
 from pathlib import Path
-from typing import Dict, Literal
+from typing import Dict, Literal, Union
+
+import cv2
 
 from mlops.labels.typedef.labelme import LabelmeDictType
 from mlops.labels.convert.labelme2coco import labelme2coco_batch
 from mlops.labels.convert.labelme2yolo import labelme2yolo_batch
+from mlops.datasets.core.abcs import DataPreprocessorABC
 
 
-def tag_from_dirname(
-    dataset_dir: str,
-    raw_root: str,
-    restore_raw_root: bool,
-    mode: Literal["w", "a"]
-) -> None:
-    assert mode in ["w", "a"]
-
-    dataset_raw_label_dir = os.path.join(dataset_dir, "raw_labels")
-    batchnames = os.listdir(dataset_raw_label_dir)
-    batchnames.sort()
-
-    for bn in batchnames:
-        raw_batch_root = os.path.join(raw_root, bn)
-        casenames = os.listdir(raw_batch_root)
-        casenames.sort()
-
-        ds_tag_dir = os.path.join(dataset_raw_label_dir, "tags")
-
-        if not os.path.exists(ds_tag_dir):
-            os.makedirs(ds_tag_dir)
-
-        for cn in casenames:
-            tags = cn.split("_")
-            tags = [t.strip() for t in tags]
-
-            raw_case_dir = os.path.join(raw_batch_root, cn)
-            filenames = os.listdir(raw_case_dir)
-            filenames.sort()
-
-            for fn in filenames:
-                if not fn.endswith((".png", ".jpg", ".jpeg")):
-                    continue
-                
-                src_img_p = os.path.join(raw_case_dir, fn)
-                img_stem = Path(fn).stem
-                tag_name = f"{img_stem}.txt"
-                ds_tag_p = os.path.join(ds_tag_dir, tag_name)
-
-                with open(ds_tag_p, mode) as f:
-                    for t in tags:
-                        f.write(f"{t}\n")
-        
-                if restore_raw_root:
-                    dst_img_p = os.path.join(raw_batch_root, fn)
-                    shutil.move(src_img_p, dst_img_p)
-            
-            if restore_raw_root:
-                shutil.rmtree(raw_case_dir)
-        
 def make_ds_labelme_simple(
-    raw_root: str,
+    data_root: str,
     dataset_root: str,
-    labelme_dirname: str
+    labelme_dirname: str,
+    data_preprocessor: Union[None, DataPreprocessorABC]
 ) -> None:
     dst_labelme_dataset_root = os.path.join(dataset_root, "dataset_labelme")
     dst_train_root = os.path.join(dst_labelme_dataset_root, "train_all")
@@ -79,7 +33,7 @@ def make_ds_labelme_simple(
 
     for bn in batchnames:
         raw_label_dir = os.path.join(ds_raw_label_root, bn, labelme_dirname)
-        raw_img_dir = os.path.join(raw_root, bn)
+        raw_img_dir = os.path.join(data_root, bn)
 
         filenames = os.listdir(raw_img_dir)
         filenames.sort()
@@ -108,23 +62,56 @@ def make_ds_labelme_simple(
             if not os.path.exists(labelme_p):
                 continue
             
-            dst_img_name = f"{data_id}{img_suffix}"
-            dst_labelme_name = f"{data_id}.json"
-            dst_img_p = os.path.join(dst_root, dst_img_name)
-            dst_labelme_p = os.path.join(dst_root, dst_labelme_name)
+            if data_preprocessor is None:
+                dst_img_name = f"{data_id}{img_suffix}"
+                dst_labelme_name = f"{data_id}.json"
+                dst_img_p = os.path.join(dst_root, dst_img_name)
+                dst_labelme_p = os.path.join(dst_root, dst_labelme_name)
 
-            shutil.copy(img_p, dst_img_p)
-            shutil.copy(labelme_p, dst_labelme_p)
+                shutil.copy(img_p, dst_img_p)
+                shutil.copy(labelme_p, dst_labelme_p)
 
-            with open(dst_labelme_p, "r") as f:
-                labelme_dict: LabelmeDictType = json.load(f)
-                labelme_dict["imageData"] = None
-                labelme_dict["imagePath"] = dst_img_name
+                with open(dst_labelme_p, "r") as f:
+                    labelme_dict: LabelmeDictType = json.load(f)
+                    labelme_dict["imageData"] = None
+                    labelme_dict["imagePath"] = dst_img_name
+                
+                with open(dst_labelme_p, "w") as f:
+                    json.dump(labelme_dict, f)
+
+                data_id += 1
             
-            with open(dst_labelme_p, "w") as f:
-                json.dump(labelme_dict, f)
+            else:
+                img = cv2.imread(img_p)
+                with open(labelme_p, "r") as f:
+                    labelme_dict = json.load(labelme_dict)
 
-            data_id += 1
+                if data_preprocessor.output_type == "single":
+                    img_out, labelme_out = data_preprocessor.process_single_output(
+                        img, labelme_dict
+                    )
+                    imgs_out = [img_out]
+                    labelmes_out = [labelme_out]
+                else:
+                    imgs_out, labelmes_out = data_preprocessor.process_multi_outputs(
+                        img, labelme_dict
+                    )
+                
+                for img_out, labelme_out in zip(imgs_out, labelmes_out):
+                    dst_img_name = f"{data_id}{img_suffix}"
+                    dst_labelme_name = f"{data_id}.json"
+                    dst_img_p = os.path.join(dst_root, dst_img_name)
+                    dst_labelme_p = os.path.join(dst_root, dst_labelme_name)
+
+                    cv2.imwrite(dst_img_p, img_out)
+                    
+                    labelme_out["imageData"] = None
+                    labelme_out["imagePath"] = dst_img_name
+                    
+                    with open(dst_labelme_p, "w") as f:
+                        json.dump(labelme_dict, f)
+
+                    data_id += 1
 
 def convert_ds_labelme2yolo(
     dataset_root: str,
@@ -169,4 +156,3 @@ def convert_ds_labelme2coco(
             [img_dir], [labelme_dir], coco_root, split, 
             export_coco_name, cat_name_id_dict, shape_type
         )
-

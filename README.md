@@ -3,7 +3,7 @@
 ## Installation
 
 ``` bash
-# install wo gui
+# install w.o. gui
 pip install -e .[no_gui] --config-settings editable_mode=strict
 
 # install with gui
