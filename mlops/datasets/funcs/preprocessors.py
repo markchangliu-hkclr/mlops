@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -17,7 +17,11 @@ class DataCropPatchPreprocessor(DataPreprocessorABC):
     ) -> None:
         self.pad_val = pad_val
         self.patch_hw = patch_hw
-        self.output_type = "multi"
+        self._output_type = "multi"
+    
+    @property
+    def output_type(self) -> Literal["single", "multi"]:
+        return self._output_type
     
     def process_multi_outputs(
         self, 

@@ -84,7 +84,7 @@ def make_ds_labelme_simple(
             else:
                 img = cv2.imread(img_p)
                 with open(labelme_p, "r") as f:
-                    labelme_dict = json.load(labelme_dict)
+                    labelme_dict = json.load(f)
 
                 if data_preprocessor.output_type == "single":
                     img_out, labelme_out = data_preprocessor.process_single_output(
@@ -109,7 +109,7 @@ def make_ds_labelme_simple(
                     labelme_out["imagePath"] = dst_img_name
                     
                     with open(dst_labelme_p, "w") as f:
-                        json.dump(labelme_dict, f)
+                        json.dump(labelme_out, f)
 
                     data_id += 1
 
