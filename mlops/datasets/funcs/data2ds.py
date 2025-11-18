@@ -116,7 +116,6 @@ def make_ds_labelme_simple(
 def convert_ds_labelme2yolo(
     dataset_root: str,
     cat_name_id_dict: Dict[str, int],
-    labelme_dirname: str,
     shape_type: Literal["bbox", "poly"]
 ) -> None:
     labelme_root = os.path.join(dataset_root, "dataset_labelme")
@@ -137,7 +136,6 @@ def convert_ds_labelme2yolo(
 def convert_ds_labelme2coco(
     dataset_root: str,
     cat_name_id_dict: Dict[str, int],
-    labelme_dirname: str,
     shape_type: Literal["bbox", "poly", "rle"]
 ) -> None:
     labelme_root = os.path.join(dataset_root, "dataset_labelme")
