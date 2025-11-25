@@ -5,6 +5,8 @@ import shutil
 from pathlib import Path
 from typing import Callable, Union, Tuple
 
+from mlops.labels.typedef.labelme import LabelmeDictType
+
 
 def _default_name_mapf_img2ply(
     img_name: str,
@@ -16,83 +18,52 @@ def _default_name_mapf_img2ply(
 def raw2data(
     src_raw_root: str,
     dst_data_root: str,
-    split_flag: bool,
-    split_ratios: Tuple[float, float],
-    split_shuffle_flag: bool,
+    labelme_flag: bool,
 ) -> None:
-    if split_flag:
-        assert sum(split_ratios) == 1
-        assert len(split_ratios) == 2
+    data_id = 0
 
-    batchnames = os.listdir(src_raw_root)
-    batchnames.sort()
+    os.makedirs(dst_data_root, exist_ok = True)
 
-    random.seed(13)
+    for root, subdirs, files in os.walk(src_raw_root):
+        for f in files:
+            if not f.endswith((".png", ".jpeg", ".jpg")):
+                continue
 
-    for bn in batchnames:
-        src_batch_root = os.path.join(src_raw_root, bn)
+            src_img_name = f
+            src_img_suffix = Path(src_img_name).suffix
+            src_img_stem = Path(src_img_name).stem
+            src_img_p = os.path.join(root, src_img_name)
 
-        if not os.path.isdir(src_batch_root):
-            continue
-        
-        if split_flag:
-            dst_data_train_dir = os.path.join(dst_data_root, f"{bn}_train")
-            dst_data_test_dir = os.path.join(dst_data_root, f"{bn}_test")
-            os.makedirs(dst_data_train_dir, exist_ok=True)
-            os.makedirs(dst_data_test_dir, exist_ok=True)
-        else:
-            dst_data_dir = os.path.join(dst_data_root, f"{bn}_train")
-            os.makedirs(dst_data_dir, exist_ok=True)
-        
-        src_img_ps = []
+            dst_img_name = f"img{data_id}{src_img_suffix}"
+            dst_img_p = os.path.join(dst_data_root, dst_img_name)
 
-        for root, subdirs, files in os.walk(src_batch_root):
-            for file in files:
-                if not file.endswith((".png", ".jpeg", ".jpg")):
-                    continue
+            shutil.copy(src_img_p, dst_img_p)
+
+            if not labelme_flag:
+                data_id += 1
+                continue
+
+            src_labelme_name = f"{src_img_stem}.json"
+            src_labelme_p = os.path.join(root, src_labelme_name)
+            dst_labelme_name = f"img{data_id}.json"
+            dst_labelme_p = os.path.join(dst_data_root, dst_labelme_name)
+
+            if not os.path.exists(src_labelme_p):
+                data_id += 1
+                continue
+
+            shutil.copy(src_labelme_p, dst_labelme_p)
+
+            with open(dst_labelme_p, "r") as f:
+                dst_labelme: LabelmeDictType = json.load(f)
+
+            dst_labelme["imageData"] = None
+            dst_labelme["imagePath"] = dst_img_name
+
+            with open(dst_labelme_p, "w") as f:
+                json.dump(dst_labelme, f)
             
-                src_img_name = file
-                src_img_p = os.path.join(root, src_img_name)
-                src_img_ps.append(src_img_p)
-        
-        if split_flag:
-            if split_shuffle_flag:
-                random.shuffle(src_img_ps)
-
-            train_end_idx = int(len(src_img_ps) * split_ratios[0])
-            src_train_img_ps = src_img_ps[:train_end_idx]
-            src_test_img_ps = src_img_ps[train_end_idx:]
-
-            data_idx = 0
-
-            for src_img_p in src_train_img_ps:
-                img_suffix = Path(src_img_p).suffix
-                dst_img_name = f"{data_idx}{img_suffix}"
-                dst_img_p = os.path.join(dst_data_train_dir, dst_img_name)
-
-                shutil.copy(src_img_p, dst_img_p)
-
-                data_idx += 1
-            
-            for src_img_p in src_test_img_ps:
-                img_suffix = Path(src_img_p).suffix
-                dst_img_name = f"{data_idx}{img_suffix}"
-                dst_img_p = os.path.join(dst_data_test_dir, dst_img_name)
-
-                shutil.copy(src_img_p, dst_img_p)
-
-                data_idx += 1
-        else:
-            data_idx = 0
-
-            for src_img_p in src_img_ps:
-                img_suffix = Path(src_img_p).suffix
-                dst_img_name = f"{data_idx}{img_suffix}"
-                dst_img_p = os.path.join(dst_data_dir, dst_img_name)
-
-                shutil.copy(src_img_p, dst_img_p)
-
-                data_idx += 1
+            data_id += 1
 
 def split_data(
     src_root: str,
