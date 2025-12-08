@@ -23,9 +23,6 @@ def img_labelme_p_generator(
         labelme_name = img_name.replace(img_suffix, ".json")
         labelme_p = os.path.join(labelme_dir, labelme_name)
 
-        if not os.path.exists(labelme_p):
-            continue
-
         yield img_p, labelme_p
 
 def get_shape_groups(

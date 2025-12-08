@@ -24,7 +24,7 @@ BBoxesXYWHArrType: TypeAlias = npt.NDArray[np.number]
 BBoxLabelmeType: TypeAlias = Tuple[Tuple[float, float], Tuple[float, float]]
 """
 `BBoxLabelmeType`
-    `Tuple[Tuple[float, float], Tuple[float, float]], `(2, (2, ))`, `[[x1, y1], [x2, y2]]`
+    `Tuple[Tuple[float, float], Tuple[float, float]]`, `(2, (2, ))`, `[[x1, y1], [x2, y2]]`
 """
 
 BBoxesLabelmeType: TypeAlias = List[BBoxLabelmeType]
