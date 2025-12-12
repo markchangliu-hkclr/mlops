@@ -5,6 +5,8 @@ import shutil
 from pathlib import Path
 from typing import Callable, Union, Tuple
 
+import cv2
+
 from mlops.labels.typedef.labelme import LabelmeDictType
 
 
@@ -122,3 +124,73 @@ def split_data(
 
         if os.path.exists(src_labelme_p):
             shutil.copy(src_labelme_p, dst_labelme_p)
+
+def video2imgs(
+    video_p: str,
+    img_dir: str,
+    save_frame_period: int
+) -> None:
+    """
+    Args
+    - `save_frame_period`: `int`, save 1 frame for every `save_frame_period` frames
+    """
+    os.makedirs(img_dir, exist_ok = True)
+
+    # 打开视频文件
+    cap = cv2.VideoCapture(video_p)
+    
+    if not cap.isOpened():
+        print(f"can not open video '{video_p}'")
+        return
+    
+    # 获取视频基本信息
+    fps = cap.get(cv2.CAP_PROP_FPS)  # 帧率
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))  # 总帧数
+    duration = total_frames / fps  # 视频总时长（秒）
+    
+    print(f"video_p: {video_p}")
+    print(f"video info: {fps:.2f}fps, total {total_frames} frames, duration {duration:.2f}s")
+    
+    frame_count = 0
+    start_frame = 0
+    saved_count = 0
+    end_frame = total_frames
+    current_frame = start_frame
+
+    print("extracting frames...")
+    
+    while current_frame <= end_frame:
+        ret, frame = cap.read()
+        
+        if not ret:
+            print("no more frames, video ends")
+            break
+        
+        # 每隔frame_interval帧保存一张图片
+        if frame_count % save_frame_period == 0:
+            # 生成文件名（使用帧编号，便于排序）
+            frame_filename = f"frame_{current_frame:06d}.jpg"
+            output_path = os.path.join(img_dir, frame_filename)
+            
+            # 保存帧为图片
+            success = cv2.imwrite(output_path, frame)
+            
+            if success:
+                saved_count += 1
+                if saved_count % 10 == 0:  # 每保存10张图片打印一次进度
+                    print(f"saved {saved_count} frames, progress: {current_frame}/{total_frames}")
+            else:
+                print(f"save failed: {output_path}")
+        
+        frame_count += 1
+        current_frame += 1
+        
+        # 跳过中间帧，提高处理速度
+        if save_frame_period > 1:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, current_frame)
+    
+    # 释放资源
+    cap.release()
+    print(f"complete, {saved_count} imgs saved at {img_dir}")
+    print()
+    
