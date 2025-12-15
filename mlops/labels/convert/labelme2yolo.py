@@ -157,6 +157,9 @@ def labelme2yolo_batch(
         )
 
         for img_p, labelme_p in p_generator:
+            if not os.path.exists(img_p):
+                continue
+
             img_suffix = Path(img_p).suffix
             export_img_name = f"{curr_img_id}{img_suffix}"
             export_img_p = os.path.join(export_img_dir, export_img_name)
@@ -164,10 +167,14 @@ def labelme2yolo_batch(
             export_label_name = f"{curr_img_id}.txt"
             export_label_p = os.path.join(export_label_dir, export_label_name)
 
-            labelme2yolo_file(
-                img_p, labelme_p, export_img_p, export_label_p, 
-                cat_name_id_dict, shape_type
-            )
+            if os.path.exists(labelme_p):
+                labelme2yolo_file(
+                    img_p, labelme_p, export_img_p, export_label_p, 
+                    cat_name_id_dict, shape_type
+                )
+            else:
+                with open(export_label_p, "w") as f:
+                    f.write("")
 
             curr_img_id += 1
 
