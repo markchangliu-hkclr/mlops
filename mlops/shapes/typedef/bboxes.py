@@ -43,5 +43,5 @@ BBoxYoloType: TypeAlias = Tuple[float, float, float, float]
 """
 `BBoxYoloType`
     `Tuple[float, float, float, float]`, `(4, )`, 
-    `[x_ctr_norm, y_ctr_norm, w_norm, y_norm]`
+    `[x_ctr_norm, y_ctr_norm, w_norm, h_norm]`
 """

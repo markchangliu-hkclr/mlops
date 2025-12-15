@@ -28,3 +28,13 @@ def poly2poly_labelme2yolo(
     img_wh = np.asarray((img_hw[1], img_hw[0])).reshape(-1, 2)
     poly = (poly / img_wh).flatten().tolist()
     return poly
+
+def poly2poly_yolo2labelme(
+    poly: poly_type.PolyYoloType,
+    img_hw: Tuple[int, int]
+) -> poly_type.PolyLabelmeType:
+    poly = np.asarray(poly).reshape(-1, 2)
+    poly[:, 0] = poly[:, 0] * img_hw[1]
+    poly[:, 1] = poly[:, 1] * img_hw[0]
+    poly = poly.astype(np.int64).tolist()
+    return poly
