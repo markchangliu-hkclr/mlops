@@ -1,3 +1,4 @@
+import random
 from typing import Tuple, List, Literal
 
 import numpy as np
@@ -13,10 +14,12 @@ class DataCropPatchPreprocessor(DataPreprocessorABC):
     def __init__(
         self,
         pad_val: int,
-        patch_hw: Tuple[int, int]
+        patch_hw: Tuple[int, int],
+        edge_pad_include_prob: float
     ) -> None:
         self.pad_val = pad_val
         self.patch_hw = patch_hw
+        self.edge_pad_include_prob = edge_pad_include_prob
         self._output_type = "multi"
     
     @property
@@ -28,10 +31,32 @@ class DataCropPatchPreprocessor(DataPreprocessorABC):
         bgr: NDArray[np.uint8], 
         labelme_dict: LabelmeDictType
     ) -> Tuple[List[NDArray[np.uint8]], List[LabelmeDictType]]:
-        bgr_patches = crop_img2patches(
+        bgr_patches_ = crop_img2patches(
             bgr, self.pad_val, self.patch_hw
         )
-        labelme_patches = crop_labelme2patches(
+        labelme_patches_ = crop_labelme2patches(
             labelme_dict, self.patch_hw
         )
+
+        assert len(bgr_patches_) == len(labelme_patches_)
+
+        bgr_patches = []
+        labelme_patches = []
+
+        for b_patch, l_patch in zip(bgr_patches_, labelme_patches_):
+            b_patch_channel_avg = np.mean(b_patch, axis = 2).astype(np.uint8)
+            pad_area = np.sum(b_patch_channel_avg == self.pad_val)
+            pad_area_ratio = pad_area / b_patch_channel_avg.size
+
+            dice = random.uniform(0, 1.0)
+
+            if pad_area_ratio < 0.6:
+                bgr_patches.append(b_patch)
+                labelme_patches.append(l_patch)
+            elif self.edge_pad_include_prob > dice:
+                bgr_patches.append(b_patch)
+                labelme_patches.append(l_patch)
+            else:
+                continue
+
         return bgr_patches, labelme_patches
