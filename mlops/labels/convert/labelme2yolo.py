@@ -173,6 +173,7 @@ def labelme2yolo_batch(
                     cat_name_id_dict, shape_type
                 )
             else:
+                shutil.copy(img_p, export_img_p)
                 with open(export_label_p, "w") as f:
                     f.write("")
 
