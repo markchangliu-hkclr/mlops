@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -20,5 +20,5 @@ no_gui = [
     "opencv-python-headless"
 ]
 
-[tool.setuptools]
-packages = {find = {}}
+[tool.setuptools.packages.find]
+where = ["src"]
