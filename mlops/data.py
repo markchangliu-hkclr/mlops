@@ -1,5 +1,6 @@
 import os
 import json
+import glob
 import random
 import shutil
 from pathlib import Path
@@ -193,4 +194,52 @@ def video2imgs(
     cap.release()
     print(f"complete, {saved_count} imgs saved at {img_dir}")
     print()
+
+def imgs2video(
+    image_folder, 
+    output_video, 
+    fps=30, 
+    codec='mp4v'
+) -> None:
+    """
+    将指定文件夹中的连续帧图片合成为 MP4 视频。
+
+    参数:
+        image_folder (str): 存放图片的文件夹路径。
+        output_video (str): 输出视频的文件路径（建议以 .mp4 结尾）。
+        fps (int): 视频帧率（默认 30）。
+        codec (str): 视频编码格式（默认 'mp4v'，对应 MP4）。
+    """
+    # 获取所有图片文件，支持常见格式
+    image_paths = sorted(glob.glob(os.path.join(image_folder, "*.png")) +
+                         glob.glob(os.path.join(image_folder, "*.jpg")) +
+                         glob.glob(os.path.join(image_folder, "*.jpeg")))
+
+    if not image_paths:
+        raise ValueError("指定文件夹中没有找到支持的图片文件（.png, .jpg, .jpeg）")
+
+    # 读取第一张图片以获取尺寸
+    first_frame = cv2.imread(image_paths[0])
+    height, width, layers = first_frame.shape
+
+    # 设置视频编码器和 VideoWriter
+    fourcc = cv2.VideoWriter_fourcc(*codec)
+    video = cv2.VideoWriter(output_video, fourcc, fps, (width, height))
+
+    if not video.isOpened():
+        raise RuntimeError("无法创建视频写入器，请检查路径或编码器是否支持")
+
+    for img_path in image_paths:
+        frame = cv2.imread(img_path)
+        if frame is None:
+            print(f"警告：无法读取图像 {img_path}，跳过")
+            continue
+        # 如果图像尺寸不一致，可选择跳过或调整尺寸（此处跳过）
+        if frame.shape[0] != height or frame.shape[1] != width:
+            print(f"警告：图像 {img_path} 尺寸不匹配，跳过")
+            continue
+        video.write(frame)
+
+    video.release()
+    print(f"视频已保存至: {output_video}")
     
