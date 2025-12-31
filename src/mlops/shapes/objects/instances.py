@@ -1,37 +1,36 @@
-from typing import Optional, Union, List
+from typing import Union, List
 
 import numpy as np
 from numpy.typing import NDArray
 
-from .bboxes import BaseBBoxes
-from .masks import BaseMasks
-from .array1d import BaseCategoryIDs, BaseConfidences
+from .bboxes import BBoxes
+from .masks import Masks
+from .others import CategoryIDs, Confidences
 
 
 __all__ = ["Instances"]
 
 
-class BaseInstances:
+class Instances:
+    """
+    `confs, cat_ids, bboxes, Optional[masks]`
+    """
+
     def __init__(
         self,
-        confs: BaseConfidences,
-        cat_ids: BaseCategoryIDs,
-        bboxes: BaseBBoxes,
-        masks: Optional[BaseMasks],
+        confs: Confidences,
+        cat_ids: CategoryIDs,
+        bboxes: BBoxes,
+        masks: Union[None, Masks],
+        check_flag: bool
     ) -> None:
-        assert len(confs) == len(cat_ids) == len(bboxes)
-
-        if masks is not None:
-            assert len(confs) == len(masks)
+        if check_flag:
+            self.check(confs, cat_ids, bboxes, masks)
         
-        self.confs = confs.astype(np.float32)
-        self.cat_ids = cat_ids.astype(np.int32)
-        self.bboxes = bboxes.astype(np.int32)
-
-        if masks is not None:
-            self.masks = masks.astype(np.bool_)
-        else:
-            self.masks = None
+        self.confs = confs
+        self.cat_ids = cat_ids
+        self.bboxes = bboxes
+        self.masks = masks
     
     def __len__(self) -> int:
         return len(self.confs)
@@ -60,6 +59,23 @@ class BaseInstances:
         )
 
         return new_insts
+    
+    def check(
+        self, 
+        confs: Confidences,
+        cat_ids: CategoryIDs,
+        bboxes: BBoxes,
+        masks: Union[None, Masks],
+    ) -> None:
+        confs.check()
+        cat_ids.check()
+        bboxes.check()
+        assert len(confs) == len(cat_ids) == len(bboxes)
+
+        if masks is not None:
+            masks.check()
+            assert len(confs) == len(masks)
+
     
     def sort_by_conf(self) -> None:
         sort_indice = np.argsort(self.confs)[::-1]
