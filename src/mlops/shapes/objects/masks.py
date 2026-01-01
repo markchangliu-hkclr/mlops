@@ -4,6 +4,8 @@ from typing import Union, List
 import numpy as np
 from numpy.typing import NDArray
 
+from ..typing import MasksArrType
+
 
 __all__ = ["Masks"]
 
@@ -20,7 +22,7 @@ class Masks:
     
     def __init__(
         self, 
-        data: NDArray[np.bool_],
+        data: MasksArrType,
         check_flag: bool
     ) -> None:
         if check_flag:

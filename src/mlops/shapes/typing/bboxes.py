@@ -8,12 +8,11 @@ __all__ = [
     "BBoxArrXYXYType",
     "BBoxArrXYWHType",
     "BBoxLabelmeType",
-    "BBoxesLabelmeType",
     "BBoxCocoType",
     "BBoxYoloType",
 
-    "BBoxesXYXYType",
-    "BBoxesXYWHType",
+    "BBoxesArrXYXYType",
+    "BBoxesArrXYWHType",
     "BBoxesLabelmeType",
 ]
 

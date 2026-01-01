@@ -4,6 +4,8 @@ from typing import List, Literal, Union
 import numpy as np
 from numpy.typing import NDArray
 
+from ..typing import ConfidencesArrType, CategoryIDsArrType
+
 
 __all__ = ["CategoryIDs", "Confidences"]
 
@@ -20,7 +22,7 @@ class CategoryIDs:
 
     def __init__(
         self,
-        data: NDArray[np.integer],
+        data: CategoryIDsArrType,
         check_flag: bool
     ) -> None:
         if check_flag:
@@ -89,7 +91,7 @@ class Confidences:
 
     def __init__(
         self,
-        data: NDArray[np.floating],
+        data: ConfidencesArrType,
         check_flag: bool
     ) -> None:
         if check_flag:

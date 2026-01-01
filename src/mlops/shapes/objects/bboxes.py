@@ -4,6 +4,8 @@ from typing import List, Union
 import numpy as np
 from numpy.typing import NDArray
 
+from ..typing import BBoxesArrXYXYType
+
 
 __all__ = ["BBoxes"]
 
@@ -21,7 +23,7 @@ class BBoxes:
 
     def __init__(
         self, 
-        data: NDArray[np.integer],
+        data: BBoxesArrXYXYType,
         check_flag: bool
     ) -> None:
         if check_flag:

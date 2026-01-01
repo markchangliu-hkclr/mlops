@@ -5,17 +5,17 @@ from numpy.typing import NDArray
 
 
 __all__ = [
-    "ConfidencesArrtype",
+    "ConfidencesArrType",
     "CategoryIDsArrType"
 ]
 
 
-ConfidencesArrtype: TypeAlias
+ConfidencesArrType: TypeAlias = NDArray[np.floating]
 """
 `(n, ), float, np array`
 """
 
-CategoryIDsArrType: TypeAlias
+CategoryIDsArrType: TypeAlias = NDArray[np.floating]
 """
 `(n, ), int, np array`
 """
