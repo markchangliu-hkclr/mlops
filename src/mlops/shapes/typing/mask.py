@@ -1,28 +1,23 @@
-from typing import Tuple
-
-try:
-    from typing import TypeAlias
-except:
-    from typing_extensions import TypeAlias
+from typing import Tuple, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
 
 
 __all__ = [
-    "MaskType",
+    "MaskArrType",
     "MaskImgType",
 
-    "MasksType",
+    "MasksArrType",
     
     "MaskShapeType",
     "MasksShapeType"
 ]
 
 
-MaskType: TypeAlias = npt.NDArray[np.bool_]
+MaskArrType: TypeAlias = npt.NDArray[np.bool_]
 """
-`MaskType`
+`MaskArrType`
     `NDArray[np.bool_]`, `(img_h, img_w)`
 """
 
@@ -38,9 +33,9 @@ MaskImgType: TypeAlias = npt.NDArray[np.uint8]
     `NDArray[np.uint8]`, `(img_h, img_w)`, 0 ~ 255
 """
 
-MasksType: TypeAlias = npt.NDArray[np.bool_]
+MasksArrType: TypeAlias = npt.NDArray[np.bool_]
 """
-`MasksType`
+`MasksArrType`
     `NDArray[np.bool_]`, `(num_masks, img_h, img_w)`
 """
 
