@@ -30,16 +30,38 @@ class Masks:
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(
+    def getitem(
         self,
-        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_]]
+        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_]],
+        update_flag: bool
     ) -> "Masks":
-        new_data = self.data[item, ...]
-        new_masks = Masks(new_data, False)
-        return new_masks
+        new_data = self.data[item]
+
+        if update_flag:
+            self.data = new_data
+            return self
+        else:
+            new_cat_ids = Masks(new_data, False)
+            return new_cat_ids
     
     def check(self, data: NDArray[np.bool_]) -> None:
         assert len(data.shape) == 3
+    
+    def sort(
+        self,
+        sort_key: Union[List[int], NDArray[np.integer]],
+        update_flag: bool
+    ) -> "Masks":
+        assert len(sort_key) == len(self.data)
+        return self.getitem(sort_key, update_flag)
+    
+    def filter(
+        self,
+        filter_key: Union[List[bool], NDArray[np.bool_]],
+        update_flag: bool
+    ) -> "Masks":
+        assert len(filter_key) == len(self.data)
+        return self.getitem(filter_key, update_flag)
     
     def concat(
         self, 
