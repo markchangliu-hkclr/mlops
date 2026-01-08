@@ -1,21 +1,26 @@
-from typing import List, Tuple
+from typing import List, Tuple, TypeAlias
 
-try:
-    from typing import TypeAlias
-except:
-    from typing_extensions import TypeAlias
+import numpy as np
+from numpy.typing import NDArray
 
 
 __all__ = [
+    "PolyArrType",
     "PolyLabelmeType",
     "PolyCocoType",
     "PolyYoloType",
 
+    "PolysArrType",
     "PolysLabelmeType",
     "PolysCocoType",
     "PolysYoloType",
 ]
 
+
+PolyArrType: TypeAlias = NDArray[np.integer]
+"""
+`np array, (num_points, 2), [[x, y], ...]`
+"""
 
 
 PolyLabelmeType: TypeAlias = List[Tuple[float, float]]
@@ -34,6 +39,11 @@ PolyCocoType: TypeAlias = List[float]
 """
 `PolyCocoType`
     `List[float]`, `(num_points * 2, )`, `[x1, y1, x2, y2, ...]`
+"""
+
+PolysArrType: TypeAlias = List[NDArray[np.integer]]
+"""
+`List[np array], (num_polys, (num_points, 2)), [PolyArr1, PolyArr2, ...]`
 """
 
 PolysCocoType: TypeAlias = List[List[float]]

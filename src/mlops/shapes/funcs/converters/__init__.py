@@ -1,1 +1,1 @@
-from .bbox2bbox import **
+from .bbox2bbox import *
