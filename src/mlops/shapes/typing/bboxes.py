@@ -14,6 +14,8 @@ __all__ = [
     "BBoxesArrXYXYType",
     "BBoxesArrXYWHType",
     "BBoxesLabelmeType",
+    "BBoxesCocoType",
+    "BBoxesYoloType"
 ]
 
 BBoxArrXYXYType: TypeAlias = npt.NDArray[np.number]
@@ -50,7 +52,7 @@ BBoxYoloType: TypeAlias = Tuple[float, float, float, float]
 BBoxesArrXYXYType: TypeAlias = npt.NDArray[np.number]
 """
 `BBoxesArrXYXYType`
-    `NDArray[np.number]`, `(num_bboxes, 4)`, `[[x1, y1, w, h], ...]`
+    `NDArray[np.number]`, `(num_bboxes, 4)`, `[[x1, y1, x2, y2], ...]`
 """
 
 BBoxesArrXYWHType: TypeAlias = npt.NDArray[np.number]
@@ -62,5 +64,16 @@ BBoxesArrXYWHType: TypeAlias = npt.NDArray[np.number]
 BBoxesLabelmeType: TypeAlias = List[BBoxLabelmeType]
 """
 `BBoxesLabelmeType`
-    `List[BBoxLabelmeType], `(n, (2, ))`, `[[[x1, y1], [x2, y2]], ...]`
+    `List[BBoxLabelmeType], `(n, (2, 2))`, `[[[x1, y1], [x2, y2]], ...]`
+"""
+
+BBoxesCocoType: TypeAlias = List[BBoxCocoType]
+"""
+`BBoxesCocoType`
+    `List[BBoxCocoType]`, `(n, (4, ))`, `[[x1, y1, w, h], ...]`
+"""
+
+BBoxesYoloType: TypeAlias = List[BBoxYoloType]
+"""
+`BBoxesYoloType, List[BBoxYoloType], (n, (4, )), [[x_ctr_norm, y_ctr_norm, w_norm, y_norm], ...]`
 """
