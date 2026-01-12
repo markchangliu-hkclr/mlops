@@ -2,36 +2,60 @@ from typing import Tuple
 
 import numpy as np
 
-import mlops.shapes.typing.poly as poly_type
+from mlops.shapes.typing.polys import PolyArrType, PolyLabelmeType, \
+    PolyCocoType, PolyYoloType
 
 
 __all__ = [
-    "poly2poly_labelme2coco",
-    "poly2poly_coco2yolo",
-    "poly2poly_labelme2yolo"
+    "polyArr_to_polyLabelme",
+    "polyArr_to_polyCoco",
+    "polyArr_to_polyYolo",
+    "polyLabelme_to_polyArr",
+    "polyLabelme_to_polyCoco",
+    "polyLabelme_to_polyYolo",
 ]
 
 
-def poly2poly_labelme2coco(
-    poly: poly_type.PolyLabelmeType
-) -> poly_type.PolyCocoType:
+def polyArr_to_polyLabelme(
+    poly: PolyArrType
+) -> PolyLabelmeType:
+    poly = poly.tolist()
+    return poly
+
+def polyArr_to_polyCoco(
+    poly: PolyArrType
+) -> PolyCocoType:
+    poly = polyArr_to_polyLabelme(poly)
+    poly = polyLabelme_to_polyCoco(poly)
+    return poly
+
+def polyArr_to_polyYolo(
+    poly: PolyArrType,
+    img_hw: Tuple[int, int]
+) -> PolyYoloType:
+    poly = polyArr_to_polyLabelme(poly)
+    poly = polyLabelme_to_polyYolo(poly, img_hw)
+    return poly
+
+def polyLabelme_to_polyCoco(
+    poly: PolyLabelmeType
+) -> PolyCocoType:
     poly = np.asarray(poly).flatten().tolist()
     return poly
 
-def poly2poly_coco2yolo(
-    poly: poly_type.PolyCocoType,
+def polyLabelme_to_polyYolo(
+    poly: PolyLabelmeType,
     img_hw: Tuple[int, int]
-) -> poly_type.PolyYoloType:
-    poly = np.asarray(poly).reshape(-1, 2)
-    img_wh = np.asarray((img_hw[1], img_hw[0])).reshape(-1, 2)
-    poly = (poly / img_wh).flatten().tolist()
+) -> PolyYoloType:
+    img_h, img_w = img_hw
+    poly = np.asarray(poly)
+    poly[:, 0] = poly[:, 0] / img_w
+    poly[:, 1] = poly[:, 1] / img_h
+    poly = poly.flatten()
     return poly
 
-def poly2poly_labelme2yolo(
-    poly: poly_type.PolyLabelmeType,
-    img_hw: Tuple[int, int]
-) -> poly_type.PolyYoloType:
+def polyLabelme_to_polyArr(
+    poly: PolyLabelmeType
+) -> PolyArrType:
     poly = np.asarray(poly)
-    img_wh = np.asarray((img_hw[1], img_hw[0])).reshape(-1, 2)
-    poly = (poly / img_wh).flatten().tolist()
     return poly

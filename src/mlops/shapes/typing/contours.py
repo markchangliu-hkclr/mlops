@@ -1,9 +1,4 @@
-from typing import List, Literal, Tuple, Dict, TypedDict
-
-try:
-    from typing import TypeAlias
-except:
-    from typing_extensions import TypeAlias
+from typing import List, Literal, Tuple, TypeAlias, TypedDict
 
 import numpy as np
 import numpy.typing as npt

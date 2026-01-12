@@ -38,7 +38,7 @@ PolysLabelmeType: TypeAlias = List[List[Tuple[float, float]]]
 PolyCocoType: TypeAlias = List[float]
 """
 `PolyCocoType`
-    `List[float]`, `(num_points * 2, )`, `[x1, y1, x2, y2, ...]`
+    `List[float]`, `(num_points * 2, )`, `[x1, y1, x2, y2, x3, y3, ...]`
 """
 
 PolysArrType: TypeAlias = List[NDArray[np.integer]]

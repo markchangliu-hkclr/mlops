@@ -1,74 +1,92 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 
-from mlops.shapes.typing import ContourType, PolyLabelmeType, \
-    PolyCocoType, PolyYoloType, ContoursType, PolysLabelmeType, \
-    PolysCocoType, PolysYoloType
+from mlops.shapes.typing import (
+    PolyArrType,
+    PolyLabelmeType,
+    PolyCocoType,
+    PolyYoloType,
+    ContourType,
+)
 
 
 __all__ = [
-    "cnt2poly_labelme",
-    "cnt2poly_coco",
-    "cnt2poly_yolo",
-    "cnts2polys_labelme",
-    "cnts2polys_coco",
-    "cnts2polys_yolo"
+    "contour_to_polyArr",
+    "contour_to_polyLabelme",
+    "contour_to_polyCoco",
+    "contour_to_polyYolo",
+
+    "contours_to_polyArrs",
+    "contours_to_polyLabelmes",
+    "contours_to_polyCocos",
+    "contours_to_polyYolos"
 ]
 
 
-def cnt2poly_labelme(
-    cnt: ContourType
+def contour_to_polyArr(
+    contour: ContourType
+) -> PolyArrType:
+    poly = np.squeeze(contour, axis = 1)
+    return poly
+
+def contour_to_polyLabelme(
+    contour: ContourType
 ) -> PolyLabelmeType:
-    poly_labelme = np.squeeze(cnt).tolist()
-    return poly_labelme
+    poly = np.squeeze(contour, axis = 1).tolist()
+    return poly
 
-def cnt2poly_coco(
-    cnt: ContourType
+def contour_to_polyCoco(
+    contour: ContourType,
 ) -> PolyCocoType:
-    poly_coco = cnt.flatten().tolist()
-    return poly_coco
+    poly = contour.flatten().tolist()
+    return poly
 
-def cnt2poly_yolo(
-    cnt: ContourType,
+def contour_to_polyYolo(
+    contour: ContourType,
     img_hw: Tuple[int, int]
 ) -> PolyYoloType:
-    poly_yolo = np.squeeze(cnt)
-    poly_yolo = poly_yolo / np.asarray((img_hw[1], img_hw[0])).reshape(-1, 2)
-    poly_yolo = poly_yolo.flatten().tolist()
-    return poly_yolo
+    img_h, img_w = img_hw
+    poly = contour.copy()
+    poly[:, :, 0] = poly[:, :, 0] / img_w
+    poly[:, :, 1] = poly[:, :, 1] / img_h
+    poly = poly.flatten().tolist()
+    return poly
 
-def cnts2polys_labelme(
-    cnts: ContoursType
-) -> PolysLabelmeType:
-    polys_labelme = []
+def contours_to_polyArrs(
+    contours: List[ContourType]
+) -> List[PolyArrType]:
+    polys = []
+    for cnt in contours:
+        poly = contour_to_polyArr(cnt)
+        polys.append(poly)
+    return polys
 
-    for cnt in cnts:
-        polys_labelme = cnt2poly_labelme(cnt)
-        polys_labelme.append(polys_labelme)
+def contours_to_polyLabelmes(
+    contours: List[ContourType]
+) -> List[PolyLabelmeType]:
+    polys = []
+    for cnt in contours:
+        poly = contour_to_polyLabelme(cnt)
+        polys.append(poly)
+    return polys 
 
-    return polys_labelme
+def contours_to_polyCocos(
+    contours: List[ContourType]
+) -> List[PolyCocoType]:
+    polys = []
+    for cnt in contours:
+        poly = contour_to_polyCoco(cnt)
+        polys.append(poly)
+    return polys 
 
-def cnts2polys_coco(
-    cnts: ContoursType
-) -> PolysCocoType:
-    polys_coco = []
-
-    for cnt in cnts:
-        poly_coco = cnt2poly_coco(cnt)
-        polys_coco.append(poly_coco)
-    
-    return polys_coco
-
-def cnts2polys_yolo(
-    cnts: ContoursType,
+def contours_to_polyYolos(
+    contours: List[ContourType],
     img_hw: Tuple[int, int]
-) -> PolysYoloType:
-    polys_yolo = []
+) -> List[PolyYoloType]:
+    polys = []
+    for cnt in contours:
+        poly = contour_to_polyYolo(cnt, img_hw)
+        polys.append(poly)
+    return polys
 
-    for cnt in cnts:
-        poly_yolo = cnt2poly_yolo(cnt, img_hw)
-        polys_yolo.append(poly_yolo)
-    
-    return polys_yolo
-    

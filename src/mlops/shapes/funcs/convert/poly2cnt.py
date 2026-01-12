@@ -2,35 +2,47 @@ from typing import Tuple
 
 import numpy as np
 
-import mlops.shapes.typing.cnt as cnt_type
-import mlops.shapes.typing.poly as poly_type
+# import mlops.shapes.typing.cnt as cnt_type
+# import mlops.shapes.typing.poly as poly_type
+
+from mlops.shapes.typing.polys import *
+from mlops.shapes.typing.contours import *
 
 
 __all__ = [
-    "poly2cnt_labelme",
-    "poly2cnt_coco",
-    "poly2cnt_yolo"
+    "polyArr_to_contour",
+    "polyLabelme_to_contour",
+    "polyCoco_to_contour",
+    "polyYolo_to_contour"
 ]
 
 
-def poly2cnt_labelme(
-    poly: poly_type.PolyLabelmeType
-) -> cnt_type.ContourType:
-    cnt = np.asarray(poly, dtype = np.int32)
-    cnt = np.expand_dims(cnt, 1)
+def polyArr_to_contour(
+    poly: PolyArrType
+) -> ContourType:
+    cnt = poly[:, None, :].astype(np.int32)
     return cnt
 
-def poly2cnt_coco(
-    poly: poly_type.PolyCocoType
-) -> cnt_type.ContourType:
-    cnt = np.asarray(poly, dtype = np.int32).reshape(-1, 1, 2)
+def polyLabelme_to_contour(
+    poly: PolyLabelmeType
+) -> ContourType:
+    cnt = np.asarray(poly)[:, None, :].astype(np.int32)
     return cnt
 
-def poly2cnt_yolo(
-    poly: poly_type.PolyYoloType,
+def polyCoco_to_contour(
+    poly: PolyCocoType
+) -> ContourType:
+    cnt = np.asarray(poly).reshape((-1, 1, 2)).astype(np.int32)
+    return cnt
+
+def polyYolo_to_contour(
+    poly: PolyYoloType,
     img_hw: Tuple[int, int]
-) -> cnt_type.ContourType:
-    cnt = np.asarray(poly, dtype = np.int32).reshape(-1, 1, 2)
-    img_wh = np.asarray((img_hw[1], img_hw[0])).reshape(1, 1, 2)
-    cnt = cnt * img_wh
-    return cnt
+) -> ContourType:
+    img_h, img_w = img_hw
+    poly = np.asarray(poly).reshape((-1, 1, 2))
+    poly[:, :, 0] = poly[:, :, 0] * img_w
+    poly[:, :, 1] = poly[:, :, 1] * img_h
+    poly = poly.astype(np.int32)
+    return poly
+

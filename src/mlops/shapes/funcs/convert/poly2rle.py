@@ -1,49 +1,81 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 import pycocotools.mask as pycocomask
 
-import mlops.shapes.typing.poly as poly_type
-import mlops.shapes.typing.rle as rle_type
+from mlops.shapes.typing.polys import *
+from mlops.shapes.typing.rles import RleType
 
 
 __all__ = [
-    "poly2rle_labelme",
-    "poly2rle_coco",
-    "poly2rle_yolo",
-    "polys2rle_merge_coco"
+    "polyArrs_to_rles",
+    "polyLabelmes_to_rles",
+    "polyCocos_to_rles",
+    "polyYolos_to_rles"
 ]
 
 
-def poly2rle_labelme(
-    poly: poly_type.PolyLabelmeType,
-    img_hw: Tuple[int, int]
-) -> rle_type.RLEType:
-    poly = np.asarray(poly, dtype = np.int32).flatten().tolist()
-    rle = pycocomask.frPyObjects([poly], img_hw[0], img_hw[1])[0]
-    return rle
-
-def poly2rle_coco(
-    poly: poly_type.PolyCocoType,
-    img_hw: Tuple[int, int]
-) -> rle_type.RLEType:
-    rle = pycocomask.frPyObjects([poly], img_hw[0], img_hw[1])[0]
-    return rle
-
-def poly2rle_yolo(
-    poly: poly_type.PolyYoloType,
-    img_hw: Tuple[int, int]
-) -> rle_type.RLEType:
-    poly = np.asarray(poly).reshape(-1, 2)
-    img_wh = np.asarray((img_hw[1], img_hw[0])).reshape(-1, 2)
-    poly = (poly * img_wh).astype(np.int32).flatten().tolist()
-    rle = pycocomask.frPyObjects([poly], img_hw[0], img_hw[1])[0]
-    return rle
-
-def polys2rle_merge_coco(
-    polys: poly_type.PolysCocoType,
-    img_hw: Tuple[int, int]
-) -> rle_type.RLEType:
+def polyArrs_to_rles(
+    polys: List[PolyArrType],
+    img_hw: Tuple[int, int],
+    merge_flag: bool
+) -> List[RleType]:
+    polys = [p.flatten().astype(np.int32) for p in polys]
     rles = pycocomask.frPyObjects(polys, img_hw[0], img_hw[1])
-    rle = pycocomask.merge(rles)
-    return rle
+
+    if merge_flag:
+        rle_merge = pycocomask.merge(rles)
+        rles = [rle_merge]
+    
+    return rles
+
+def polyLabelmes_to_rles(
+    polys: List[PolyLabelmeType],
+    img_hw: Tuple[int, int],
+    merge_flag: bool
+) -> List[RleType]:
+    polys = [np.asarray(p).astype(np.int32).flatten().tolist() for p in polys]
+    rles = pycocomask.frPyObjects(polys, img_hw[0], img_hw[1])
+
+    if merge_flag:
+        rle_merge = pycocomask.merge(rles)
+        rles = [rle_merge]
+    
+    return rles
+
+def polyCocos_to_rles(
+    polys: List[PolyCocoType],
+    img_hw: Tuple[int, int],
+    merge_flag: bool
+) -> List[RleType]:
+    polys = [np.asarray(p).astype(np.int32).tolist() for p in polys]
+    rles = pycocomask.frPyObjects(polys, img_hw[0], img_hw[1])
+
+    if merge_flag:
+        rle_merge = pycocomask.merge(rles)
+        rles = [rle_merge]
+    
+    return rles
+
+def polyYolos_to_rles(
+    polys: List[PolyYoloType],
+    img_hw: Tuple[int, int],
+    merge_flag: bool
+) -> List[RleType]:
+    img_h, img_w = img_hw
+    polys_ = []
+    for poly in polys:
+        poly = np.asarray(poly).reshape(-1, 2)
+        poly[:, 0] = poly[:, 0] * img_w
+        poly[:, 1] = poly[:, 1] * img_h
+        poly = poly.astype(np.int32).flatten().tolist()
+        polys_.append(poly)
+    polys = polys_
+
+    rles = pycocomask.frPyObjects(polys, img_hw[0], img_hw[1])
+
+    if merge_flag:
+        rle_merge = pycocomask.merge(rles)
+        rles = [rle_merge]
+    
+    return rles

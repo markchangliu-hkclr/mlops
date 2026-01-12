@@ -3,8 +3,13 @@ from typing import Tuple, Union
 
 import numpy as np
 
-from mlops.shapes.typing import ContourType, ContoursType, \
-    HierarchiesType, ContourGroupType, ContourGroupsType
+from mlops.shapes.typing import (
+    ContourType, 
+    ContoursType, 
+    HierarchiesType, 
+    ContourGroupType, 
+    ContourGroupsType
+)
 
 
 __all__ = [
@@ -121,7 +126,7 @@ def merge_contours(
     sibling_flag: bool,
     hierarchies: Union[None, HierarchiesType]
 ) -> ContourType:
-    if not sibling_flag:
+    if sibling_flag:
         cnt_merge = _merge_sibling_contours(cnts)
         return cnt_merge
     

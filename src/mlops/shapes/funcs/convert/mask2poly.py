@@ -1,19 +1,44 @@
+from typing import List, Tuple
 
-from mlops.shapes.funcs.cnt2poly import cnt2poly_labelme
-from mlops.shapes.funcs.mask2cnt import mask2cnt_merge
-from mlops.shapes.typing.mask import MaskType
-from mlops.shapes.typing.poly import PolyLabelmeType
+from mlops.shapes.typing.masks import MaskArrType
+from mlops.shapes.typing.polys import PolyLabelmeType, PolyCocoType, \
+    PolyYoloType
+from mlops.shapes.funcs.convert.mask2contour import maskArr_to_contour
+from mlops.shapes.funcs.convert.contour2poly import *
 
 
 __all__ = [
-    "mask2poly_labelme"
+    "maskArr_to_polyLabelmes",
+    "maskArr_to_polyCocos",
+    "maskArr_to_polyYolos"
 ]
 
 
-def mask2poly_labelme(
-    mask: MaskType,
-    approx_flag: bool
-) -> PolyLabelmeType:
-    cnt = mask2cnt_merge(mask, approx_flag)
-    poly = cnt2poly_labelme(cnt)
-    return poly
+def maskArr_to_polyLabelmes(
+    mask: MaskArrType,
+    approx_flag: bool,
+    merge_flag: bool
+) -> List[PolyLabelmeType]:
+    cnts = maskArr_to_contour(mask, approx_flag, merge_flag)
+    polys = contours_to_polyLabelmes(cnts)
+    return polys
+
+def maskArr_to_polyCocos(
+    mask: MaskArrType,
+    approx_flag: bool,
+    merge_flag: bool
+) -> List[PolyCocoType]:
+    cnts = maskArr_to_contour(mask, approx_flag, merge_flag)
+    polys = contours_to_polyCocos(cnts)
+    return polys
+
+def maskArr_to_polyYolos(
+    mask: MaskArrType,
+    approx_flag: bool,
+    merge_flag: bool,
+    img_hw: Tuple[int, int]
+) -> List[PolyYoloType]:
+    cnts = maskArr_to_contour(mask, approx_flag, merge_flag)
+    polys = contours_to_polyYolos(cnts, img_hw)
+    return polys
+
