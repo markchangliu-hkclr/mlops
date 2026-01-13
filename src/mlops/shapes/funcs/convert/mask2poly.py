@@ -1,8 +1,7 @@
 from typing import List, Tuple
 
 from mlops.shapes.typing.masks import MaskArrType
-from mlops.shapes.typing.polys import PolyLabelmeType, PolyCocoType, \
-    PolyYoloType
+from mlops.shapes.typing.polys import *
 from mlops.shapes.funcs.convert.mask2contour import maskArr_to_contour
 from mlops.shapes.funcs.convert.contour2poly import *
 

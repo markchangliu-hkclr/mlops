@@ -2,9 +2,6 @@ from typing import Tuple
 
 import numpy as np
 
-# import mlops.shapes.typing.cnt as cnt_type
-# import mlops.shapes.typing.poly as poly_type
-
 from mlops.shapes.typing.polys import *
 from mlops.shapes.typing.contours import *
 

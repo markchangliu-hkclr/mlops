@@ -2,13 +2,8 @@ from typing import Tuple, List
 
 import numpy as np
 
-from mlops.shapes.typing import (
-    PolyArrType,
-    PolyLabelmeType,
-    PolyCocoType,
-    PolyYoloType,
-    ContourType,
-)
+from mlops.shapes.typing.polys import *
+from mlops.shapes.typing.contours import *
 
 
 __all__ = [

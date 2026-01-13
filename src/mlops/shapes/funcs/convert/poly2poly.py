@@ -2,8 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from mlops.shapes.typing.polys import PolyArrType, PolyLabelmeType, \
-    PolyCocoType, PolyYoloType
+from mlops.shapes.typing.polys import *
 
 
 __all__ = [

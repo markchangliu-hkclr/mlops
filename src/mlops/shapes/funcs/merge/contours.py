@@ -3,13 +3,7 @@ from typing import Tuple, Union
 
 import numpy as np
 
-from mlops.shapes.typing import (
-    ContourType, 
-    ContoursType, 
-    HierarchiesType, 
-    ContourGroupType, 
-    ContourGroupsType
-)
+from mlops.shapes.typing.contours import *
 
 
 __all__ = [

@@ -5,11 +5,15 @@ import numpy as np
 from mlops.shapes.typing.bboxes import *
 from mlops.shapes.typing.masks import *
 from mlops.shapes.typing.others import *
+from mlops.shapes.structs.instances import Instances
 
 
 __all__ = [
     "concat_bboxArrXYXYs",
-    "concat_maskArrs"
+    "concat_maskArrs",
+    "concat_confidenceArrs",
+    "concat_categoryArrs",
+    "concat_instances"
 ]
 
 
@@ -56,3 +60,26 @@ def concat_categoryArrs(
 ) -> CategoryIDsArrType:
     cats_output = np.concat(cats_list).astype(np.int32)
     return cats_output
+
+def concat_instances(
+    insts_list: List[Instances]
+) -> Instances:
+    confs_list = [i.confs for i in insts_list]
+    cat_ids_list = [i.cat_ids for i in insts_list]
+    bboxes_list = [i.bboxes for i in insts_list]
+    masks_list = [i.masks for i in insts_list]
+
+    new_confs = concat_confidenceArrs(confs_list)
+    new_cat_ids = concat_categoryArrs(cat_ids_list)
+    new_bboxes = concat_bboxArrXYXYs(bboxes_list)
+    
+    if None in masks_list:
+        new_masks = None
+    else:
+        new_masks = concat_maskArrs(masks_list)
+    
+    new_insts = Instances(
+        new_confs, new_cat_ids, new_bboxes, new_masks
+    )
+
+    return new_insts

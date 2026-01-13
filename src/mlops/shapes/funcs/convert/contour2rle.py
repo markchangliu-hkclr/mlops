@@ -2,7 +2,8 @@ from typing import Tuple, List
 
 import pycocotools.mask as pycocomask
 
-from mlops.shapes.typing import ContourType, RleType
+from mlops.shapes.typing.contours import ContourType
+from mlops.shapes.typing.rles import RleType
 
 
 __all__ = [

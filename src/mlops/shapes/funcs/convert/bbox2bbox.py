@@ -2,14 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from ...typing import (
-    BBoxesArrXYWHType,
-    BBoxesArrXYXYType,
-    BBoxesLabelmeType,
-    BBoxesLabelmeType,
-    BBoxesCocoType,
-    BBoxesYoloType,
-)
+from mlops.shapes.typing.bboxes import *
 
 
 __all__ = [

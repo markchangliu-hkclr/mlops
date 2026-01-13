@@ -3,7 +3,7 @@ from typing import Tuple, List
 import numpy as np
 import pycocotools.mask as pycocomask
 
-from mlops.shapes.typing import MaskArrType, ContourType
+from mlops.shapes.typing.masks import MaskArrType, ContourType
 from mlops.shapes.funcs.convert.contour2rle import *
 
 
