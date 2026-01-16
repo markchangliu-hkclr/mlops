@@ -33,7 +33,7 @@ class Instances:
         self.masks = self.masks.astype(np.bool_)
 
     def __len__(self) -> int:
-        return 
+        return len(self.confs)
     
     def getitem(
         self,

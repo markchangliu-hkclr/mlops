@@ -41,11 +41,6 @@ PolyCocoType: TypeAlias = List[float]
     `List[float]`, `(num_points * 2, )`, `[x1, y1, x2, y2, x3, y3, ...]`
 """
 
-PolysArrType: TypeAlias = List[NDArray[np.integer]]
-"""
-`List[np array], (num_polys, (num_points, 2)), [PolyArr1, PolyArr2, ...]`
-"""
-
 PolysCocoType: TypeAlias = List[List[float]]
 """
 `PolysCocoType`
