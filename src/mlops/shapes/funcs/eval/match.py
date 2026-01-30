@@ -4,6 +4,14 @@ import numpy as np
 from numpy.typing import NDArray
 
 
+__all__ = [
+    "match_1vs1",
+    "match_precision_focus",
+    "match_recall_focus",
+    "get_tp_fp_fn"
+]
+
+
 def match_1vs1(
     scores: NDArray[np.floating],
     thres: float,
