@@ -4,14 +4,16 @@ from pathlib import Path
 import shutil
 from typing import List, Dict, Literal
 
-import pycocotools.mask as pycocomask
-
-from mlops.datasets.typing.coco import CocoFileType, \
-    CocoImgType, CocoAnnType, CocoCatType
+from mlops.datasets.typing.coco import CocoFileType, CocoImgType, CocoCatType
 from mlops.datasets.typing.image import ImgMetaType
 from mlops.shapes.structs.instances import Instances
-from mlops.shapes.funcs.convert.mask2poly import maskArr_to_polyCocos
-from mlops.shapes.funcs.convert.poly2rle import polyCocos_to_rles
+
+from mlops.datasets.funcs.convert.insts2coco import instances_to_cocoAnns
+
+
+__all__ = [
+    "export_coco"
+]
 
 
 def export_coco(
@@ -29,53 +31,43 @@ def export_coco(
     export_json_p = os.path.join(export_root, export_json_fn)
     os.makedirs(export_img_dir, exist_ok = True)
 
-    img_dict: CocoImgType = {}
-    ann_dict: CocoAnnType = {}
-    cat_dict: CocoCatType = {}
+    coco_dict: CocoFileType = {
+        "images": [],
+        "annotations": [],
+        "categories": []
+    }
 
     img_id = 0
     ann_id = 0
     
     for cat_id, cat_name in cat_id_name_dict.items():
+        cat_dict: CocoCatType = {}
         cat_dict["id"] = cat_id
         cat_dict["name"] = cat_name
+        coco_dict["categories"].append(cat_dict)
 
     for meta, insts in zip(img_metas, insts_list):
+        img_dict: CocoImgType = {}
         img_dict["file_name"] = Path(meta["img_p"]).name
         img_dict["height"] = meta["img_hw"][0]
         img_dict["width"] = meta["img_hw"][1]
         img_dict["id"] = img_id
+        coco_dict["images"].append(img_dict)
 
         src_img_p = meta["img_p"]
         dst_img_p = os.path.join(export_img_dir, img_dict["file_name"])
         shutil.copy(src_img_p, dst_img_p)
 
-        for inst in insts:
-            bbox = inst.bboxes[0].tolist()
-            ann_dict["bbox"] = bbox
-            ann_dict["id"] = ann_id
-            ann_dict["image_id"] = img_id
-            ann_dict["iscrowd"] = False
-            ann_dict["category_id"] = inst.cat_ids[0].tolist()
-
-            if shape_format == "bbox":
-                ann_dict["segmentation"] = []
-
-                w = bbox[2] - bbox[0]
-                h = bbox[3] - bbox[1]
-                ann_dict["area"] = w * h
-            else:
-                mask = inst.masks[0]
-                polys = maskArr_to_polyCocos(mask, True, False)
-                ann_dict["segmentation"] = polys
-
-                rles = polyCocos_to_rles(polys, meta["img_hw"], True)
-                area = pycocomask.area(rles)
-                ann_dict["area"] = area
-            
-            ann_id += 1
+        anns = instances_to_cocoAnns(
+            insts, meta["img_hw"], shape_format, img_id, ann_id
+        )
+        coco_dict["annotations"] += anns
         
         img_id += 1
+        ann_id += len(anns)
+    
+    with open(export_json_p, "w") as f:
+        json.dump(coco_dict, f)
     
     
 

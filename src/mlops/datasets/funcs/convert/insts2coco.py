@@ -1,9 +1,8 @@
-from typing import List, Literal
+from typing import List, Literal, Tuple
 
 import pycocotools.mask as pycocomask
 
 from mlops.datasets.typing.coco import CocoAnnType
-from mlops.datasets.typing.image import ImgMetaType
 from mlops.shapes.structs.instances import Instances
 from mlops.shapes.funcs.convert.mask2poly import maskArr_to_polyCocos
 from mlops.shapes.funcs.convert.poly2rle import polyCocos_to_rles
@@ -15,8 +14,8 @@ __all__ = [
 
 
 def instances_to_cocoAnns(
-    img_meta: ImgMetaType,
     insts: Instances,
+    img_hw: Tuple[int, int],
     shape_format: Literal["bbox", "poly"],
     img_id: int,
     start_ann_id: int
@@ -45,7 +44,7 @@ def instances_to_cocoAnns(
             polys = maskArr_to_polyCocos(mask, True, False)
             ann_dict["segmentation"] = polys
 
-            rles = polyCocos_to_rles(polys, img_meta["img_hw"], True)
+            rles = polyCocos_to_rles(polys, img_hw, True)
             area = pycocomask.area(rles)
             ann_dict["area"] = area
         
