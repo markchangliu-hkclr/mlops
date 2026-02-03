@@ -13,7 +13,8 @@ __all__ = [
     "bboxesArrXYXY_to_bboxesYolo",
     "bboxesLabelme_to_bboxesArrXYXY",
     "bboxesCoco_to_bboxesArrXYXY",
-    "bboxesYolo_to_bboxesArrXYXY"
+    "bboxesYolo_to_bboxesArrXYXY",
+    "bboxLabelme_to_bboxArrXYXY"
 ]
 
 
@@ -83,3 +84,9 @@ def bboxesYolo_to_bboxesArrXYXY(
     bboxes[:, [2, 3]] = bboxes[:, [0, 1]] + bboxes[:, [2, 3]]
     bboxes = bboxes.astype(np.int32)
     return bboxes
+
+def bboxLabelme_to_bboxArrXYXY(
+    bbox: BBoxLabelmeType
+) -> BBoxArrXYWHType:
+    bbox = np.asarray(bbox).flatten()
+    return bbox

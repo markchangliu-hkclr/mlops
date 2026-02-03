@@ -34,6 +34,13 @@ class Instances:
 
     def __len__(self) -> int:
         return len(self.confs)
+
+    def __getitem__(
+        self,
+        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_]],
+    ) -> "Instances":
+        new_insts = self.getitem(item, False)
+        return new_insts
     
     def getitem(
         self,

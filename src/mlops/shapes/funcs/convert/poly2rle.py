@@ -11,7 +11,8 @@ __all__ = [
     "polyArrs_to_rles",
     "polyLabelmes_to_rles",
     "polyCocos_to_rles",
-    "polyYolos_to_rles"
+    "polyYolos_to_rles",
+    "polyLabelme_to_rle"
 ]
 
 
@@ -79,3 +80,11 @@ def polyYolos_to_rles(
         rles = [rle_merge]
     
     return rles
+
+def polyLabelme_to_rle(
+    poly: PolyLabelmeType,
+    img_hw: Tuple[int, int],
+) -> RleType:
+    poly = [np.asarray(poly).astype(np.int32).tolist()]
+    rle = pycocomask.frPyObjects(poly, img_hw[0], img_hw[1])[0]
+    return rle
