@@ -1,6 +1,4 @@
-import os
 import json
-from pathlib import Path
 from typing import List, Tuple, Literal, Dict
 
 import numpy as np
@@ -16,7 +14,7 @@ from mlops.shapes.funcs.concat import concat_instances
 
 
 __all__ = [
-    "labelme_to_instances",
+    "labelmeFile_to_instances",
 ]
 
 
@@ -91,7 +89,7 @@ def shapeGroup_to_instances(
     insts = Instances(confs, cat_ids, bboxes, masks)
     return insts
 
-def labelme_to_instances(
+def labelmeFile_to_instances(
     fp: str,
     merge_group_flag: bool,
     cat_name_id_dict: Dict[str, int],

@@ -9,10 +9,10 @@ from mlops.shapes.typing.rles import RleType
 
 __all__ = [
     "polyArrs_to_rles",
-    "polyLabelmes_to_rles",
-    "polyCocos_to_rles",
-    "polyYolos_to_rles",
-    "polyLabelme_to_rle"
+    "polyLabelme_to_rle",
+    "polysLabelme_to_rles",
+    "polysCoco_to_rles",
+    "polysYolo_to_rles",
 ]
 
 
@@ -30,7 +30,7 @@ def polyArrs_to_rles(
     
     return rles
 
-def polyLabelmes_to_rles(
+def polysLabelme_to_rles(
     polys: List[PolyLabelmeType],
     img_hw: Tuple[int, int],
     merge_flag: bool
@@ -44,7 +44,7 @@ def polyLabelmes_to_rles(
     
     return rles
 
-def polyCocos_to_rles(
+def polysCoco_to_rles(
     polys: List[PolyCocoType],
     img_hw: Tuple[int, int],
     merge_flag: bool
@@ -58,7 +58,7 @@ def polyCocos_to_rles(
     
     return rles
 
-def polyYolos_to_rles(
+def polysYolo_to_rles(
     polys: List[PolyYoloType],
     img_hw: Tuple[int, int],
     merge_flag: bool

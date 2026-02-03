@@ -9,6 +9,11 @@ from mlops.shapes.funcs.convert.mask2poly import maskArr_to_polyCocos
 from mlops.shapes.funcs.convert.poly2rle import polyCocos_to_rles
 
 
+__all__ = [
+    "instances_to_cocoAnns"
+]
+
+
 def instances_to_cocoAnns(
     img_meta: ImgMetaType,
     insts: Instances,

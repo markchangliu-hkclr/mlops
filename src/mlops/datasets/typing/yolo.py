@@ -11,7 +11,7 @@ YoloBBoxType: TypeAlias = Tuple[int, float, float, float, float]
 """
 `YoloBBoxType`
     `Tuple[int, float, float, float, float]`, `(5, )`, 
-    `[cat_id, x_ctr_norm, y_ctr_norm, w_norm, y_norm]`
+    `[cat_id, x_ctr_norm, y_ctr_norm, w_norm, h_norm]`
 """
 
 YoloPolyType: TypeAlias = List[float]

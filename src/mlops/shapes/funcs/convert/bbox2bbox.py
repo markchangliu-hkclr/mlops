@@ -14,7 +14,9 @@ __all__ = [
     "bboxesLabelme_to_bboxesArrXYXY",
     "bboxesCoco_to_bboxesArrXYXY",
     "bboxesYolo_to_bboxesArrXYXY",
-    "bboxLabelme_to_bboxArrXYXY"
+    "bboxLabelme_to_bboxArrXYXY",
+    "bboxCoco_to_bboxArrXYXY",
+    "bboxYolo_to_bboxArrXYXY"
 ]
 
 
@@ -89,4 +91,25 @@ def bboxLabelme_to_bboxArrXYXY(
     bbox: BBoxLabelmeType
 ) -> BBoxArrXYWHType:
     bbox = np.asarray(bbox).flatten()
+    return bbox
+
+def bboxCoco_to_bboxArrXYXY(
+    bbox: BBoxCocoType
+) -> BBoxArrXYXYType:
+    x1, y1, w, h = bbox
+    bbox = [x1, y1, x1 + w, y1 + h]
+    bbox = np.asarray(bbox).astype(np.int32)
+    return bbox
+
+def bboxYolo_to_bboxArrXYXY(
+    bbox: BBoxYoloType,
+    img_hw: Tuple[int, int]
+) -> BBoxArrXYXYType:
+    img_h, img_w = img_hw
+    bbox = np.asarray(bbox)
+    bbox[[0, 2]] = bbox[[0, 2]] * img_w
+    bbox[[1, 3]] = bbox[[1, 3]] * img_h
+    bbox[[0, 1]] = bbox[[0, 1]] - 0.5 * bbox[[2, 3]]
+    bbox[[2, 3]] = bbox[[0, 1]] + bbox[[2, 3]]
+    bbox = bbox.astype(np.int32)
     return bbox
