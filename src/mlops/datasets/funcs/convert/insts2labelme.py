@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal, Dict, Tuple
 
 from mlops.datasets.typing.labelme import LabelmeFileType, LabelmeShapeType
@@ -27,7 +28,7 @@ def instances_to_labelmeFile(
         "imageData": None,
         "imageHeight": img_hw[0],
         "imageWidth": img_hw[1],
-        "imagePath": dst_img_p
+        "imagePath": Path(dst_img_p).name
     }
 
     if shape_format == "bbox":
