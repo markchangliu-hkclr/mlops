@@ -44,4 +44,6 @@ def export_yolo(
                 line = [str(e) for e in line]
                 line = " ".join(line)
                 f.write(f"{line}\n")
+        
+        data_id += 1
     

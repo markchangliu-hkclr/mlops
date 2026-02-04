@@ -37,22 +37,22 @@ class Instances:
 
     def __getitem__(
         self,
-        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_]],
+        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_], slice],
     ) -> "Instances":
         new_insts = self.getitem(item, False)
         return new_insts
     
     def getitem(
         self,
-        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_]],
+        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_], slice],
         update_flag: bool
     ) -> "Instances":
-        new_confs = self.confs.getitem(item, update_flag)
-        new_cat_ids = self.cat_ids.getitem(item, update_flag)
-        new_bboxes = self.bboxes.getitem(item, update_flag)
+        new_confs = self.confs[item]
+        new_cat_ids = self.cat_ids[item]
+        new_bboxes = self.bboxes[item, ...]
 
         if self.masks is not None:
-            new_masks = self.masks.getitem(item, update_flag)
+            new_masks = self.masks[item, ...]
         else:
             new_masks = None
         

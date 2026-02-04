@@ -9,11 +9,11 @@ from mlops.shapes.structs.instances import Instances
 
 
 __all__ = [
-    "load_coco_dataset"
+    "load_coco"
 ]
 
 
-def load_coco_dataset(
+def load_coco(
     coco_fp: str,
     img_p_prefix: str,
     shape_format: Literal["bbox", "poly"],

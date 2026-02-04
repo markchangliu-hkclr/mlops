@@ -10,15 +10,17 @@ from mlops.shapes.structs.instances import Instances
 
 
 __all__ = [
-    "load_yolo_dataset"
+    "load_yolo"
 ]
 
 
-def load_yolo_dataset(
+def load_yolo(
     img_dirs: List[str],
     label_dirs: List[str],
     shape_format: Literal["bbox", "poly"],
 ) -> Tuple[List[ImgMetaType], List[Instances]]:
+    assert isinstance(img_dirs, list)
+    assert isinstance(label_dirs, list)
     assert len(img_dirs) == len(label_dirs)
     assert shape_format in Literal["bbox", "poly"]
 

@@ -11,11 +11,11 @@ from mlops.datasets.funcs.convert.labelme2insts import labelmeFile_to_instances
 
 
 __all__ = [
-    "load_labelme_dataset",
+    "load_labelme",
 ]
 
 
-def load_labelme_dataset(
+def load_labelme(
     img_dirs: List[str],
     labelme_dirs: List[str],
     cat_name_id_dict: Dict[str, int],
@@ -28,6 +28,8 @@ def load_labelme_dataset(
     - `img_metas: List[ImgMetaType]`
     - `insts_list: List[Instances]`
     """
+    assert isinstance(img_dirs, list)
+    assert isinstance(labelme_dirs, list)
     assert len(img_dirs) == len(labelme_dirs)
 
     img_metas = []
