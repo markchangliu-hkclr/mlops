@@ -52,7 +52,7 @@ def match_1vs1(
 
     return pred_matches, gt_matches
 
-def match_precision_focus(
+def match_prec_focus(
     scores: NDArray[np.floating],
     thres: float,
 ) -> Tuple[NDArray[np.integer], NDArray[np.bool_]]:
@@ -88,7 +88,7 @@ def match_precision_focus(
 
     return pred_matches, gt_matches
 
-def match_recall_focus(
+def match_rec_focus(
     scores: NDArray[np.floating],
     thres: float,
 ) -> Tuple[NDArray[np.bool_], NDArray[np.integer]]:
