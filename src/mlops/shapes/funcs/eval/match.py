@@ -123,7 +123,7 @@ def match_rec_focus(
 
     return pred_matches, gt_matches
 
-def get_tp_fp_fn(
+def get_tp_fn(
     pred_matches: Union[NDArray[np.integer], NDArray[np.bool_]],
     gt_matches: Union[NDArray[np.integer], NDArray[np.bool_]],
 ) -> Tuple[List[int], List[int], List[int]]:
@@ -139,36 +139,21 @@ def get_tp_fp_fn(
 
     Returns
     -----
-    - `tp_pred_ids: List[int], (num_preds, )`
-    - `fp_pred_ids: List[int], (num_preds, )`
-    - `fn_gt_ids: List[int], (num_gts, )`
+    - `tp_pred_flags: NDArray[np.bool_], (num_preds, )`
+    - `fn_gt_flags: NDArray[np.bool_], (num_gts, )`
     """
-    num_preds = len(pred_matches)
-    pred_ids = np.arange(num_preds).astype(np.int32)
-
-    num_gts = len(gt_matches)
-    gt_ids = np.arange(num_gts).astype(np.int32)
-
     if len(pred_matches.shape) == 1:
-        tp_pred_ids = pred_ids[pred_matches > -1]
-        fp_pred_ids = pred_ids[pred_matches == -1]
+        tp_pred_flags = pred_matches > -1
     elif len(pred_matches.shape) == 2:
-        tp_flags = np.any(pred_matches, axis = 1)
-        tp_pred_ids = pred_ids[tp_flags]
-        fp_pred_ids = pred_ids[~tp_flags]
+        tp_pred_flags = np.any(pred_matches, axis = 1)
     else:
         raise ValueError("pred_matches")
 
     if len(gt_matches.shape) == 1:
-        fn_pred_ids = gt_ids[gt_matches == -1]
+        fn_gt_flags = gt_matches
     elif len(gt_matches.shape) == 2:
-        fn_flags = np.any(gt_matches, axis = 1)
-        fn_pred_ids = gt_ids[fn_flags]
+        fn_gt_flags = np.any(gt_matches, axis = 1)
     else:
         raise ValueError("gt_matches")
     
-    tp_pred_ids = tp_pred_ids.tolist()
-    fp_pred_ids = fp_pred_ids.tolist()
-    fn_pred_ids = fn_pred_ids.tolist()
-    
-    return tp_pred_ids, fp_pred_ids, fn_pred_ids
+    return tp_pred_flags, fn_gt_flags
