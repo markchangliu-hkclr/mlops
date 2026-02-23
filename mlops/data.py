@@ -84,13 +84,16 @@ def split_data(
     os.makedirs(dst_test_root, exist_ok = True)
 
     fns = os.listdir(src_root)
-    img_names = [f for f in fns if f.endswith((".png", ".jpg", ".jpeg"))]
+    img_names = [f for f in fns if f.endswith((".png", ".jpg", ".jpeg", ".bmp"))]
     img_names.sort()
 
     if shuffle_flag:
         random.shuffle(img_names)
 
-    split_idx = int(len(img_names) * train_test_ratios[0])
+    if len(img_names) < 3:
+        split_idx = 0
+    else:
+        split_idx = int(len(img_names) * train_test_ratios[0])
 
     for i in range(0, split_idx):
         img_name = img_names[i]
@@ -125,6 +128,26 @@ def split_data(
 
         if os.path.exists(src_labelme_p):
             shutil.copy(src_labelme_p, dst_labelme_p)
+
+def split_data_subdirs(
+    src_root: str,
+    dst_train_root: str,
+    dst_test_root: str,
+    train_test_ratios: Tuple[float, float],
+    shuffle_flag: bool,
+    labelme_flag: bool,
+) -> None:
+    subdirs = os.listdir(src_root)
+
+    for subdir in subdirs:
+        src_dir = os.path.join(src_root, subdir)
+        dst_train_dir = os.path.join(dst_train_root, subdir)
+        dst_test_dir = os.path.join(dst_test_root, subdir)
+
+        split_data(
+            src_dir, dst_train_dir, dst_test_dir, train_test_ratios,
+            shuffle_flag, labelme_flag
+        )
 
 def video2imgs(
     video_p: str,
