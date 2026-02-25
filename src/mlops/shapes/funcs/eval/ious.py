@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -8,12 +8,39 @@ from mlops.shapes.typing.masks import MasksArrType
 
 
 __all__ = [
-    "iou_bboxes",
-    "iou_masks"
+    "get_ious",
+    "get_ious_bboxes",
+    "get_ious_masks"
 ]
 
 
-def iou_bboxes(
+def get_ious(
+    shapesA: Union[BBoxesArrXYXYType, MasksArrType],
+    shapesB: Union[BBoxesArrXYXYType, MasksArrType],
+    shape_format: Literal["bbox", "poly"],
+    mode: Literal["iou", "iof"]
+) -> NDArray[np.floating]:
+    """
+    Intro
+    -----
+    iou: area(intersect) / area(union)
+    iof: area(intersect) / area(masksA)
+
+    Returns
+    -----
+    - `ious or iofs, NDArray[np.floating], (numA, numB)`
+    """
+    assert shape_format in ["bbox", "poly"]
+    assert mode in ["iou", "iof"]
+
+    if shape_format == "bbox":
+        ious = get_ious_bboxes(shapesA, shapesB, mode)
+    else:
+        ious = get_ious_masks(shapesA, shapesB, mode)
+    
+    return ious
+
+def get_ious_bboxes(
     bboxesA: BBoxesArrXYXYType,
     bboxesB: BBoxesArrXYXYType,
     mode: Literal["iou", "iof"]
@@ -73,7 +100,7 @@ def iou_bboxes(
     else:
         raise NotImplementedError
 
-def iou_masks(
+def get_ious_masks(
     masksA: MasksArrType,
     masksB: MasksArrType,
     mode: Literal["iou", "iof"]

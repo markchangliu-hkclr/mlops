@@ -1,10 +1,14 @@
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Literal
 
 import numpy as np
 from numpy.typing import NDArray
 
+from mlops.shapes.typing.eval import PredMatchResType, GTMatchResType, \
+    PredMatchRes1DType, PredMatchRes2DType, GTMatchRes1DType, GTMatchRes2DType
+
 
 __all__ = [
+    "match",
     "match_1vs1",
     "match_precision_focus",
     "match_recall_focus",
@@ -12,10 +16,27 @@ __all__ = [
 ]
 
 
+def match(
+    scores: NDArray[np.floating],
+    thres: float,
+    match_mode: Literal["1vs1", "prec_focus", "rec_focus"]
+) -> Tuple[PredMatchResType, GTMatchResType]:
+    assert match_mode in ["1vs1", "prec_focus", "rec_focus"]
+
+    if match_mode == "1vs1":
+        pred_matches, gt_matches = match_1vs1(scores, thres)
+    elif match_mode == "prec_focus":
+        pred_matches, gt_matches = match_prec_focus(scores, thres)
+    else:
+        pred_matches, gt_matches = match_rec_focus(scores, thres)
+    
+    return pred_matches, gt_matches
+
+
 def match_1vs1(
     scores: NDArray[np.floating],
     thres: float,
-) -> Tuple[NDArray[np.integer], NDArray[np.integer]]:
+) -> Tuple[PredMatchRes1DType, GTMatchRes1DType]:
     """
     One GT match at most has 1 PRED, one PRED match at most 1 GT
     - PRED only match to highest-score and >threshold GT
@@ -55,7 +76,7 @@ def match_1vs1(
 def match_prec_focus(
     scores: NDArray[np.floating],
     thres: float,
-) -> Tuple[NDArray[np.integer], NDArray[np.bool_]]:
+) -> Tuple[PredMatchRes1DType, GTMatchRes2DType]:
     """
     GT can match to multiple PREDs
     - PRED match to highest-score and >threshold GTs
@@ -91,7 +112,7 @@ def match_prec_focus(
 def match_rec_focus(
     scores: NDArray[np.floating],
     thres: float,
-) -> Tuple[NDArray[np.bool_], NDArray[np.integer]]:
+) -> Tuple[PredMatchRes2DType, GTMatchRes1DType]:
     """
     PRED can match to multiple GTs
     - GT match to highest-score and >threshold PRED
@@ -123,37 +144,4 @@ def match_rec_focus(
 
     return pred_matches, gt_matches
 
-def get_tp_fn(
-    pred_matches: Union[NDArray[np.integer], NDArray[np.bool_]],
-    gt_matches: Union[NDArray[np.integer], NDArray[np.bool_]],
-) -> Tuple[List[int], List[int], List[int]]:
-    """
-    Args
-    -----
-    - `pred_matches`
-        - `NDArray[np.integer]: (num_preds, )`
-        - `NDArray[np.bool_]: (num_preds, num_gts)`
-    - `gt_matches`
-        - `NDArray[np.integer]: (num_gts, )`
-        - `NDArray[np.bool_]: (num_gts, num_preds)`
 
-    Returns
-    -----
-    - `tp_pred_flags: NDArray[np.bool_], (num_preds, )`
-    - `fn_gt_flags: NDArray[np.bool_], (num_gts, )`
-    """
-    if len(pred_matches.shape) == 1:
-        tp_pred_flags = pred_matches > -1
-    elif len(pred_matches.shape) == 2:
-        tp_pred_flags = np.any(pred_matches, axis = 1)
-    else:
-        raise ValueError("pred_matches")
-
-    if len(gt_matches.shape) == 1:
-        fn_gt_flags = gt_matches
-    elif len(gt_matches.shape) == 2:
-        fn_gt_flags = np.any(gt_matches, axis = 1)
-    else:
-        raise ValueError("gt_matches")
-    
-    return tp_pred_flags, fn_gt_flags
