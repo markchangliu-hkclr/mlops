@@ -1,5 +1,5 @@
 """
-# The Contour Module
+# Contour Module
 
 ## Funcs
 
