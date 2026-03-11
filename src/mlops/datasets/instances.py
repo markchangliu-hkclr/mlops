@@ -1,0 +1,155 @@
+from typing import Union, List
+from dataclasses import dataclass
+
+import numpy as np
+from numpy.typing import NDArray
+
+from mlops.datasets.types import BBoxesArrType, MasksArrType
+
+
+@dataclass
+class Instances:
+    confs: NDArray[np.floating]
+    cat_ids: NDArray[np.integer]
+    bboxes: BBoxesArrType
+    masks: Union[MasksArrType, None]
+
+    def __post_init__(self) -> None:
+        assert len(self.confs) == len(self.cat_ids) == len(self.bboxes)
+
+        if self.masks is not None:
+            assert len(self.masks) == len(self.confs)
+        
+        self.confs = self.confs.astype(np.float32)
+        self.cat_ids = self.cat_ids.astype(np.int32)
+        self.bboxes = self.bboxes.astype(np.int32)
+        self.masks = self.masks.astype(np.bool_)
+
+    def __len__(self) -> int:
+        return len(self.confs)
+
+    def __getitem__(
+        self,
+        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_], slice],
+    ) -> "Instances":
+        new_insts = self.getitem(item, False)
+        return new_insts
+    
+    def getitem(
+        self,
+        item: Union[int, List[int], NDArray[np.integer], NDArray[np.bool_], slice],
+        update_flag: bool
+    ) -> "Instances":
+        new_confs = self.confs[item]
+        new_cat_ids = self.cat_ids[item]
+        new_bboxes = self.bboxes[item, ...]
+
+        if self.masks is not None:
+            new_masks = self.masks[item, ...]
+        else:
+            new_masks = None
+        
+        if update_flag:
+            self.confs = new_confs
+            self.cat_ids = new_cat_ids
+            self.bboxes = new_bboxes
+            self.masks = new_masks
+            return self
+        else:
+            new_insts = Instances(
+                new_confs, new_cat_ids, new_bboxes, new_masks, False
+            )
+            return new_insts
+    
+    def sort_by_confs(
+        self,
+        update_flag: bool
+    ) -> "Instances":
+        sort_key = np.argsort(self.confs)[::-1]
+        new_insts = self.getitem(sort_key, update_flag)
+        return new_insts
+    
+    def filter_by_conf_thres(
+        self,
+        conf_thres: float,
+        update_flag: bool
+    ) -> "Instances":
+        filter_key = self.confs > conf_thres
+        new_insts = self.getitem(filter_key, update_flag)
+        return new_insts
+    
+    def filter_to_topk(
+        self,
+        topk: int,
+        update_flag: bool
+    ) -> "Instances":
+        sort_key = np.argsort(self.confs)[::-1][:topk]
+        new_insts = self.getitem(sort_key, update_flag)
+        return new_insts
+    
+    def concat(
+        self,
+        others: List["Instances"],
+        update_flag: bool
+    ) -> "Instances":
+        confs_list = [self.confs] + [i.confs for i in others] 
+        cat_ids_list = [self.cat_ids] + [i.cat_ids for i in others]
+        bboxes_list = [self.bboxes] + [i.bboxes for i in others]
+
+        new_confs = np.concat(confs_list)
+        new_cat_ids = np.concat(cat_ids_list)
+        new_bboxes = np.concat(bboxes_list, axis = 0)
+
+        if self.masks is not None:
+            masks_list = [self.masks] + [i.masks for i in others]
+            new_masks = np.concat(masks_list, axis = 0)
+        else:
+            new_masks = None
+
+        if update_flag:
+            self.confs = new_confs
+            self.cat_ids = new_cat_ids
+            self.bboxes = new_bboxes
+            self.masks = new_masks
+            return self
+        else:
+            new_insts = Instances(
+                new_confs, new_cat_ids, new_bboxes, new_masks, False
+            )
+            return new_insts
+
+
+def concat_instances(
+    insts_list: List["Instances"]
+) -> "Instances":
+    mask_flag = True
+    for insts in insts_list:
+        if insts.masks is None:
+            mask_flag = False
+            break
+    
+    new_bboxes = []
+    new_confs = []
+    new_cat_ids = []
+    new_masks = []
+
+    for insts in insts_list:
+        new_bboxes.append(insts.bboxes)
+        new_confs.append(insts.confs)
+        new_cat_ids.append(insts.cat_ids)
+        new_masks.append(insts.masks)
+    
+    new_bboxes = np.concat(new_bboxes, axis = 0)
+    new_confs = np.concat(new_confs)
+    new_cat_ids = np.concat(new_cat_ids)
+
+    if mask_flag:
+        new_masks = np.concat(new_masks, axis = 0)
+    else:
+        new_masks = None
+    
+    insts = Instances(
+        new_confs, new_cat_ids, new_bboxes, new_masks
+    )
+
+    return insts
