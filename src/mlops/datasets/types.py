@@ -108,6 +108,18 @@ PolyYoloType: TypeAlias = List[float]
 `List[float], (num_points * 2, ), [x1_norm, y1_norm, x2_norm, y2_norm, ...]`
 """
 
+MaskType: TypeAlias = Union[MaskArrType, "RleType", PolyArrType, PolyLabelmeType, PolyCocoType, PolyYoloType]
+"""
+`Union[MaskArrType, "RleType", PolyArrType, PolyLabelmeType, PolyCocoType, PolyYoloType]`
+"""
+
+MasksType: TypeAlias = 
+
+PolyFormat: TypeAlias = Literal["arr", "labelme", "coco", "yolo"]
+"""
+`Literal["arr", "labelme", "coco", "yolo"]`
+"""
+
 class RleType(TypedDict):
     """
     `"size": Tuple[int, int], [img_h, img_w]`

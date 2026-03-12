@@ -5,9 +5,10 @@ import cv2
 import numpy as np
 from numpy.typing import NDArray
 
-from mlops.datasets.types import MaskArrType, MasksArrType
-from mlops.datasets.types import RleType
-from mlops.datasets.types import PolyArrType, PolyLabelmeType, PolyCocoType, PolyYoloType
+from mlops.datasets.types import (
+    MaskArrType, MasksArrType, RleType, PolyArrType, PolyLabelmeType, 
+    PolyCocoType, PolyYoloType, PolyType, PolysType, PolyFormat
+)
 
 
 def convert_maskArr2rle(
